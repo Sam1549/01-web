@@ -13,18 +13,25 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Server {
-    public static void main(String[] args) {
-        new Server();
-    }
+
+
+    private final int count;
+    private final int port;
+
 
     final List<String> validPaths = List.of("/index.html", "/spring.svg", "/spring.png", "/resources.html", "/styles.css", "/app.js", "/links.html", "/forms.html", "/classic.html", "/events.html", "/events.js");
 
 
-    private Server() {
-        final int COUNT = 64;
-        final int PORT = 9999;
-        ExecutorService executorService = Executors.newFixedThreadPool(COUNT);
-        try (var serverSocket = new ServerSocket(PORT)) {
+    private Server(ServerBuilder serverBuilder) {
+        this.port = serverBuilder.port;
+        this.count = serverBuilder.count;
+        ExecutorService executorService;
+        if (count == 0) {
+            executorService = Executors.newFixedThreadPool(4);
+        } else {
+            executorService = Executors.newFixedThreadPool(count);
+        }
+        try (var serverSocket = new ServerSocket(port)) {
             while (true) {
                 var socket = serverSocket.accept();
                 var thread = new Thread(() -> {
@@ -124,4 +131,20 @@ public class Server {
     }
 
 
+    static public class ServerBuilder {
+        private int count;
+        private int port;
+
+        public ServerBuilder(int port) {
+            this.port = port;
+        }
+
+        public ServerBuilder setCount(int count) {
+            return this;
+        }
+
+        public Server start() {
+            return new Server(this);
+        }
+    }
 }
