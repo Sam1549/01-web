@@ -98,7 +98,7 @@ public class Server {
         Handler handler = handlers.get(request.getMethod()).get(request.getPath());
         handler.handle(request, out);
         System.out.println(request);
-        System.out.println(request.getQueryParam("value"));
+        System.out.println(request.getQueryParams());
     }
 
     private static Request getRequest(BufferedInputStream in, BufferedOutputStream out) throws IOException {
@@ -132,13 +132,12 @@ public class Server {
         }
         System.out.println(method);
 
-        var path = requestLine[1];
+        var path = requestLine[1].contains("?") ? requestLine[1].substring(0,requestLine[1].indexOf("?")) : requestLine[1];
         if (!path.startsWith("/")) {
             badRequest(out);
 //                continue;
         }
 
-        if(path.contains("?")) path = path.substring(0,path.indexOf("?"));
         System.out.println(path);
 
         // ищем заголовки
